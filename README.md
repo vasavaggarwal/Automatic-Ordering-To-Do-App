@@ -59,8 +59,6 @@ project/
 │
 └── templates/
     ├── index.html       # Main UI
-    ├── base.html        # Common layout
-    └── add_task.html    # Add Task form
 ```
 
 ---
