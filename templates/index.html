@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart To-Do App</title>
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+
+  <body class="bg-light">
+    <div class="container py-4">
+      <h1 class="mb-4 text-center">Vasav GST</h1>
+
+      <!-- Add Task Form -->
+      <form method="POST" action="/add" class="row g-2 mb-4">
+        <div class="col-md-4">
+          <input
+            type="text"
+            name="title"
+            class="form-control"
+            placeholder="Task name"
+            required
+          />
+        </div>
+        <div class="col-md-2">
+          <select name="category" class="form-select">
+            <option>Necessary</option>
+            <option>College</option>
+            <option>Home</option>
+            <option>Awaragardi</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input type="date" name="due_date" class="form-control" required />
+        </div>
+        <div class="col-md-2">
+          <input type="time" name="due_time" class="form-control" required />
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-success w-100">Add</button>
+        </div>
+      </form>
+
+      <!-- Main layout row: Main block (left) + right column with two smaller blocks -->
+      <div class="row">
+        <!-- Main block -->
+        <div class="col-md-8 mb-3">
+          <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">Main Block</div>
+            <ul id="main-block" class="list-group list-group-flush min-vh-50">
+              {% for t in main_list %}
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+                data-task-id="{{ t.id }}"
+                data-due="{{ t.due_datetime.isoformat() }}"
+                data-locked="{{ '1' if t.locked else '0' }}"
+              >
+                <!-- drag handle -->
+                <span class="drag-handle me-2" style="cursor:grab">⋮⋮</span>
+
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <strong class="task-title">{{ t.title }}</strong>
+                      {% if t.part_label %}
+                        <small class="text-muted ms-2">[{{ t.part_label }}]</small>
+                      {% endif %}
+                      <small class="text-muted">({{ t.category }})</small>
+                    </div>
+
+                    <!-- tick / lock -->
+                    <button
+                      class="btn btn-sm lock-btn"
+                      data-locked="{{ '1' if t.locked else '0' }}"
+                      title="Lock/Unlock"
+                    >
+                      <span class="lock-indicator">
+                        {{ '✔' if t.locked else '◻' }}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div class="mt-1">
+                    <!-- editable due -->
+                    <small
+                      class="text-muted edit-due"
+                      style="cursor:pointer"
+                      title="Edit due date/time"
+                      >Due: {{ t.due_datetime.strftime('%d %b %H:%M') }}</small
+                    >
+
+                    <!-- split -->
+                    <button
+                      class="btn btn-sm btn-outline-secondary ms-2 split-btn"
+                      title="Split task"
+                    >
+                      Split
+                    </button>
+                  </div>
+                </div>
+
+                <div class="ms-3">
+                  <a href="/done/{{ t.id }}" class="btn btn-sm btn-outline-success"
+                    >✓</a
+                  >
+                  <a
+                    href="/delete/{{ t.id }}"
+                    class="btn btn-sm btn-outline-danger"
+                    >🗑️</a
+                  >
+                </div>
+              </li>
+              {% else %}
+              <li class="list-group-item text-muted text-center">No tasks yet</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right column with Awaragardi and Home -->
+        <div class="col-md-4">
+          <!-- Awaragardi Block -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-warning">Awaragardi</div>
+            <ul id="awaragardi-block" class="list-group list-group-flush">
+              {% for t in awaragardi_list %}
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+                data-task-id="{{ t.id }}"
+                data-due="{{ t.due_datetime.isoformat() }}"
+                data-locked="{{ '1' if t.locked else '0' }}"
+              >
+                <!-- drag handle -->
+                <span class="drag-handle me-2" style="cursor:grab">⋮⋮</span>
+
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <strong class="task-title">{{ t.title }}</strong>
+                      {% if t.part_label %}
+                        <small class="text-muted ms-2">[{{ t.part_label }}]</small>
+                      {% endif %}
+                      <small class="text-muted">({{ t.category }})</small>
+                    </div>
+
+                    <button
+                      class="btn btn-sm lock-btn"
+                      data-locked="{{ '1' if t.locked else '0' }}"
+                      title="Lock/Unlock"
+                    >
+                      <span class="lock-indicator">
+                        {{ '✔' if t.locked else '◻' }}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div class="mt-1">
+                    <small
+                      class="text-muted edit-due"
+                      style="cursor:pointer"
+                      title="Edit due date/time"
+                      >Due: {{ t.due_datetime.strftime('%d %b %H:%M') }}</small
+                    >
+
+                    <button
+                      class="btn btn-sm btn-outline-secondary ms-2 split-btn"
+                      title="Split task"
+                    >
+                      Split
+                    </button>
+                  </div>
+                </div>
+
+                <div class="ms-3">
+                  <a
+                    href="/delete/{{ t.id }}"
+                    class="btn btn-sm btn-outline-danger"
+                    >🗑️</a
+                  >
+                </div>
+              </li>
+              {% else %}
+              <li class="list-group-item text-muted text-center">No tasks yet</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Home Block -->
+          <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">Home</div>
+            <ul id="home-block" class="list-group list-group-flush">
+              {% for t in home_list %}
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+                data-task-id="{{ t.id }}"
+                data-due="{{ t.due_datetime.isoformat() }}"
+                data-locked="{{ '1' if t.locked else '0' }}"
+              >
+                <!-- drag handle -->
+                <span class="drag-handle me-2" style="cursor:grab">⋮⋮</span>
+
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between">
+                    <div>
+                      <strong class="task-title">{{ t.title }}</strong>
+                      {% if t.part_label %}
+                        <small class="text-muted ms-2">[{{ t.part_label }}]</small>
+                      {% endif %}
+                      <small class="text-muted">({{ t.category }})</small>
+                    </div>
+
+                    <button
+                      class="btn btn-sm lock-btn"
+                      data-locked="{{ '1' if t.locked else '0' }}"
+                      title="Lock/Unlock"
+                    >
+                      <span class="lock-indicator">
+                        {{ '✔' if t.locked else '◻' }}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div class="mt-1">
+                    <small
+                      class="text-muted edit-due"
+                      style="cursor:pointer"
+                      title="Edit due date/time"
+                      >Due: {{ t.due_datetime.strftime('%d %b %H:%M') }}</small
+                    >
+
+                    <button
+                      class="btn btn-sm btn-outline-secondary ms-2 split-btn"
+                      title="Split task"
+                    >
+                      Split
+                    </button>
+                  </div>
+                </div>
+
+                <div class="ms-3">
+                  <a
+                    href="/delete/{{ t.id }}"
+                    class="btn btn-sm btn-outline-danger"
+                    >🗑️</a
+                  >
+                </div>
+              </li>
+              {% else %}
+              <li class="list-group-item text-muted text-center">No tasks yet</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Due Modal (Bootstrap) -->
+    <div class="modal fade" id="editDueModal" tabindex="-1" aria-labelledby="editDueLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editDueLabel">Edit due date & time</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit-task-id" />
+            <div class="row g-2">
+              <div class="col-6">
+                <label class="form-label">Date</label>
+                <input id="edit-due-date" type="date" class="form-control" />
+              </div>
+              <div class="col-6">
+                <label class="form-label">Time</label>
+                <input id="edit-due-time" type="time" class="form-control" />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button id="edit-due-cancel" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="edit-due-save" type="button" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+      <div id="toast-area"></div>
+    </div>
+
+    <!-- SortableJS + Bootstrap JS + our custom script -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
